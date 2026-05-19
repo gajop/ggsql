@@ -1,0 +1,18 @@
+/*
+  GDP per capita vs life expectancy in 2007 — Gapminder dataset.
+  Download first:  bash examples/duckdb/download_data.sh
+  Run:  ggsql run examples/duckdb/gapminder_bubble.ggsql --reader sqlite://examples/duckdb/data/gapminder.db > gapminder_bubble.vl.json
+*/
+SELECT country, continent, lifeExp, gdpPercap, pop
+FROM gapminder
+WHERE year = 2007
+VISUALISE gdpPercap AS x, lifeExp AS y, continent AS color, pop AS size
+DRAW point SETTING opacity => 0.7
+SCALE x VIA log
+SCALE size FROM (200000, 1300000000) TO (3, 25)
+SCALE color TO tableau10
+LABEL title => 'Wealth vs Health in 2007',
+      x => 'GDP per Capita (log scale, USD)',
+      y => 'Life Expectancy (years)',
+      color => 'Continent',
+      size => 'Population'

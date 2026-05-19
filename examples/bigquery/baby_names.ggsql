@@ -1,0 +1,20 @@
+/*
+  US baby name popularity trends since 1990.
+  Dataset: bigquery-public-data.usa_names.usa_1910_current — 186 MB, 5 columns.
+  This query scans 3 of 5 columns (~112 MB). Cost: ~$0.0006 per run.
+  The 1 TB/month free tier covers thousands of runs before any charges apply.
+  Run: ggsql run examples/bigquery/baby_names.ggsql --reader bigquery://YOUR_PROJECT_ID
+*/
+SELECT year, SUM(number) AS total, name
+FROM `bigquery-public-data.usa_names.usa_1910_current`
+WHERE name IN ('Emma', 'Olivia', 'Liam', 'Noah', 'Ava')
+  AND year >= 1990
+GROUP BY year, name
+ORDER BY year, name
+VISUALISE year AS x, total AS y, name AS color
+DRAW line SETTING linewidth => 2
+SCALE color TO tableau10
+LABEL title => 'US Baby Name Popularity (1990–present)',
+      x => 'Year',
+      y => 'Babies Named',
+      color => 'Name'

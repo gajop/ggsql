@@ -1,6 +1,11 @@
 ## [Unreleased]
 
 ### Added
+- Added `examples/` directory with end-to-end runnable examples for DuckDB
+  (built-in penguins dataset, Gapminder via SQLite) and BigQuery public datasets
+  (Shakespeare, US baby names, NYC street trees). Includes `render.sh` to go
+  directly from a `.ggsql` file to SVG/PNG via `vl-convert`, and `view.sh` for
+  browser viewing.
 - New `AdbcReader<D: Driver>` for connecting to data sources via
   [ADBC](https://arrow.apache.org/adbc/) (Arrow Database Connectivity), behind
   a new off-by-default `adbc` feature flag. Generic over any concrete

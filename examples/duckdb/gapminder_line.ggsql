@@ -1,0 +1,15 @@
+/*
+  Life expectancy trends by continent — Gapminder dataset.
+  Download first:  bash examples/duckdb/download_data.sh
+  Run:  ggsql run examples/duckdb/gapminder_line.ggsql --reader sqlite://examples/duckdb/data/gapminder.db > gapminder_line.vl.json
+*/
+SELECT year, AVG(lifeExp) AS avg_life_exp, continent
+FROM gapminder
+GROUP BY year, continent
+VISUALISE year AS x, avg_life_exp AS y, continent AS color
+DRAW line SETTING linewidth => 2
+SCALE color TO tableau10
+LABEL title => 'Life Expectancy by Continent (1952–2007)',
+      x => 'Year',
+      y => 'Average Life Expectancy',
+      color => 'Continent'

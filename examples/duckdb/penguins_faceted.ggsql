@@ -1,0 +1,14 @@
+/*
+  Penguin body mass by sex, faceted by species — built-in dataset.
+  Run:  ggsql run examples/duckdb/penguins_faceted.ggsql > chart.vl.json
+*/
+SELECT species, sex, body_mass
+FROM ggsql:penguins
+WHERE body_mass IS NOT NULL AND sex IS NOT NULL
+VISUALISE sex AS x, body_mass AS y, sex AS fill
+DRAW boxplot
+FACET species
+LABEL title => 'Body Mass by Sex and Species',
+      x => 'Sex',
+      y => 'Body Mass (g)',
+      fill => 'Sex'

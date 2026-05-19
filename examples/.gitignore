@@ -1,0 +1,4 @@
+duckdb/data/
+*.svg
+*.png
+*.vl.json

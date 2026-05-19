@@ -16,22 +16,29 @@ You can execute a ggsql query from a string with `ggsql exec`:
 ggsql exec "VISUALISE species AS fill FROM ggsql:penguins DRAW bar"
 ```
 
-Or run a `.gsql` file:
+Or run a `.ggsql` file:
 
 ```bash
-ggsql run my_query.gsql
+ggsql run my_query.ggsql
 ```
 
 In both cases, output is written to `stdout` as a Vega-Lite JSON spec. You can redirect it to a file:
 
 ```bash
-ggsql run my_query.gsql > chart.vl.json
+ggsql run my_query.ggsql > chart.vl.json
 ```
 
-Such files can be rendered as images using tools that work with Vega-Lite specs, such as the [Online Vega Editor](https://vega.github.io/editor/) or [vl-convert](https://github.com/vega/vl-convert) command line tool. For example,
+Such files can be rendered using the [Online Vega Editor](https://vega.github.io/editor/) (paste the JSON) or converted to a static image with [vl-convert](https://github.com/vega/vl-convert/releases):
 
 ```bash
+vl-convert vl2svg -i chart.vl.json -o chart.svg
 vl-convert vl2png -i chart.vl.json -o chart.png
+```
+
+The repository also ships a helper script that embeds the spec in a standalone HTML file and opens it in your browser (no server needed):
+
+```bash
+bash examples/view.sh chart.vl.json
 ```
 
 A standard SQL query can also be provided to ggsql. If the query returns a table, the resulting values will be written to `stdout`.
@@ -47,7 +54,14 @@ $ ggsql validate "VISUALISE x, y FROM table DRAW point"
 
 ## Database connections
 
-Both `ggsql exec` and `ggsql run` accept a `--reader` flag that can be used to specify a connection string to be used when executing the query. If not provided, ggsql will use an empty in-memory duckdb connection, equivalent to `--reader duckdb://memory`.
+Both `ggsql exec` and `ggsql run` accept a `--reader` flag that specifies the data source connection string. If not provided, ggsql uses an in-memory DuckDB connection (`duckdb://memory`).
+
+| Scheme | Example | Notes |
+|--------|---------|-------|
+| `duckdb://` | `duckdb://memory` | In-memory DuckDB (default) |
+| `sqlite://` | `sqlite://path/to/db.sqlite` | Local SQLite file |
+| `odbc://` | `odbc://DSN=mydsn` | ODBC data source |
+| `bigquery://` | `bigquery://my-gcp-project` | Google BigQuery (requires Application Default Credentials) |
 
 ```bash
 $ ggsql exec --reader sqlite://sample/ggsql_test.sqlite \
@@ -64,6 +78,43 @@ col_a,  col_b, col_c
 299.08, 49.36, epsilon
 12.5,   29.48, gamma
 ```
+
+For BigQuery, authenticate once with the [Google Cloud SDK](https://cloud.google.com/sdk/docs/install) before running queries:
+
+```bash
+gcloud auth application-default login
+ggsql run my_query.ggsql --reader bigquery://my-gcp-project
+```
+
+## Bundled examples
+
+The ggsql repository includes ready-to-run examples under `examples/`. Each subdirectory contains `.ggsql` files and a `README.md` with setup instructions.
+
+**DuckDB — built-in penguins dataset (no download needed):**
+
+```bash
+ggsql run examples/duckdb/penguins_scatter.ggsql > scatter.vl.json
+bash examples/view.sh scatter.vl.json
+```
+
+**DuckDB — Gapminder (download once, then run locally):**
+
+```bash
+bash examples/duckdb/download_data.sh
+ggsql run examples/duckdb/gapminder_bubble.ggsql \
+  --reader sqlite://examples/duckdb/data/gapminder.db > bubble.vl.json
+bash examples/view.sh bubble.vl.json
+```
+
+**BigQuery — public datasets (requires GCP credentials):**
+
+```bash
+ggsql run examples/bigquery/shakespeare_words.ggsql \
+  --reader bigquery://YOUR_PROJECT_ID > shakespeare.vl.json
+bash examples/view.sh shakespeare.vl.json
+```
+
+See `examples/README.md` for the full list and browser/PNG viewing options.
 
 ## Documentation
 

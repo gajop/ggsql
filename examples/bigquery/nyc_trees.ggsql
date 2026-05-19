@@ -1,0 +1,20 @@
+/*
+  Top 15 tree species in New York City — 2015 street tree census.
+  Dataset: bigquery-public-data.new_york_trees.tree_census_2015 — 223 MB, 41 columns.
+  This query scans 2 of 41 columns (~11 MB). Cost: ~$0.00006 per run.
+  The 1 TB/month free tier covers hundreds of thousands of runs before any charges apply.
+  Run: ggsql run examples/bigquery/nyc_trees.ggsql --reader bigquery://YOUR_PROJECT_ID
+*/
+SELECT spc_common, COUNT(*) AS tree_count
+FROM `bigquery-public-data.new_york_trees.tree_census_2015`
+WHERE status = 'Alive' AND spc_common IS NOT NULL
+GROUP BY spc_common
+ORDER BY tree_count DESC
+LIMIT 15
+VISUALISE spc_common AS x, tree_count AS y, spc_common AS fill
+DRAW bar
+PROJECT y, x TO cartesian
+SCALE fill TO kelly22
+LABEL title => 'Top 15 Street Tree Species in NYC (2015)',
+      x => 'Species',
+      y => 'Tree Count'

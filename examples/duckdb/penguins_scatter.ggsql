@@ -1,0 +1,14 @@
+/*
+  Penguin bill dimensions — built-in dataset, no download needed.
+  Run:  ggsql run examples/duckdb/penguins_scatter.ggsql > chart.vl.json
+*/
+SELECT species, island, bill_len, bill_dep
+FROM ggsql:penguins
+WHERE bill_len IS NOT NULL AND bill_dep IS NOT NULL
+VISUALISE bill_len AS x, bill_dep AS y, species AS color
+DRAW point SETTING opacity => 0.8
+SCALE color TO set1
+LABEL title => 'Penguin Bill Dimensions by Species',
+      x => 'Bill Length (mm)',
+      y => 'Bill Depth (mm)',
+      color => 'Species'

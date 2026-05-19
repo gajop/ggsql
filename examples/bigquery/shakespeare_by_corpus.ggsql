@@ -1,0 +1,18 @@
+/*
+  Word count per Shakespeare work.
+  Dataset: bigquery-public-data.samples.shakespeare — 6.1 MB total.
+  Cost: ~$0.00003 per run, well within the 1 TB/month free tier.
+  Run: ggsql run examples/bigquery/shakespeare_by_corpus.ggsql --reader bigquery://YOUR_PROJECT_ID
+*/
+SELECT corpus, SUM(word_count) AS total_words
+FROM `bigquery-public-data.samples.shakespeare`
+GROUP BY corpus
+ORDER BY total_words DESC
+LIMIT 15
+VISUALISE corpus AS x, total_words AS y, corpus AS fill
+DRAW bar
+PROJECT y, x TO cartesian
+SCALE fill TO kelly22
+LABEL title => 'Word Count by Shakespeare Work (Top 15)',
+      x => 'Work',
+      y => 'Total Words'

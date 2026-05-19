@@ -1,0 +1,19 @@
+/*
+  Top 20 most common words in Shakespeare's works.
+  Dataset: bigquery-public-data.samples.shakespeare — 6.1 MB total.
+  Cost: ~$0.00003 per run, well within the 1 TB/month free tier.
+  Run: ggsql run examples/bigquery/shakespeare_words.ggsql --reader bigquery://YOUR_PROJECT_ID
+*/
+SELECT word, SUM(word_count) AS total_count
+FROM `bigquery-public-data.samples.shakespeare`
+WHERE LENGTH(word) > 3
+GROUP BY word
+ORDER BY total_count DESC
+LIMIT 20
+VISUALISE word AS x, total_count AS y, word AS fill
+DRAW bar
+PROJECT y, x TO cartesian
+SCALE fill TO kelly22
+LABEL title => 'Top 20 Words in Shakespeare (> 3 letters)',
+      x => 'Word',
+      y => 'Total Occurrences'
