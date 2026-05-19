@@ -34,9 +34,21 @@ if [[ "$EXT" != "svg" && "$EXT" != "png" ]]; then
     exit 1
 fi
 
+RAW_JSON="$(mktemp /tmp/ggsql.XXXXXX.vl.json)"
 VL_JSON="$(mktemp /tmp/ggsql.XXXXXX.vl.json)"
-trap 'rm -f "$VL_JSON"' EXIT
+trap 'rm -f "$RAW_JSON" "$VL_JSON"' EXIT
 
-ggsql run "$QUERY_FILE" ${READER_ARGS[@]+"${READER_ARGS[@]}"} > "$VL_JSON"
-vl-convert "vl2${EXT}" -i "$VL_JSON" -o "$OUTPUT"
+ggsql run "$QUERY_FILE" ${READER_ARGS[@]+"${READER_ARGS[@]}"} > "$RAW_JSON"
+
+# Strip "container" sizing — vl-convert has no DOM to measure, so container
+# width/height resolves to 0 and the chart renders empty.
+python3 -c "
+import json, sys
+s = json.load(open(sys.argv[1]))
+s.pop('width', None)
+s.pop('height', None)
+json.dump(s, open(sys.argv[2], 'w'))
+" "$RAW_JSON" "$VL_JSON"
+
+vl-convert "vl2${EXT}" --vl-version 6.1 -i "$VL_JSON" -o "$OUTPUT"
 echo "$OUTPUT"
